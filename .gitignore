@@ -1,0 +1,27 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environment
+.env/
+.venv/
+venv/
+ENV/
+env/
+.env.bak/
+
+# Poetry virtualenvs
+.cache/pypoetry/
+poetry.lock
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+*.sqlite3
+static/
+media/
