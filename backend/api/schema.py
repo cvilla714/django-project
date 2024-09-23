@@ -1,12 +1,16 @@
 import boto3
 import graphene
 from graphene_django.types import DjangoObjectType
-from .models import Task, UserImage  # Import models from models.py
+from .models import Task, UserImage
 from django.conf import settings
 from django.contrib.auth.models import User
 from graphql import GraphQLError
-from rest_framework.permissions import IsAuthenticated
-from graphene_django.types import DjangoObjectType
+from graphql_jwt.decorators import login_required
+from graphql_jwt.shortcuts import get_token
+from graphql_jwt.utils import jwt_decode
+import graphql_jwt
+import base64
+from django.core.files.base import ContentFile
 
 # Define a Task type for GraphQL
 class TaskType(DjangoObjectType):
@@ -41,11 +45,6 @@ class Register(graphene.Mutation):
         return Register(user=user)
 
 # Mutation for uploading images to S3
-
-import base64
-from io import BytesIO
-from django.core.files.base import ContentFile
-
 class UploadImage(graphene.Mutation):
     success = graphene.Boolean()
     image_url = graphene.String()
@@ -54,16 +53,32 @@ class UploadImage(graphene.Mutation):
         image = graphene.String(required=True)
 
     def mutate(self, info, image):
-        user = info.context.user
+        auth = info.context.META.get('HTTP_AUTHORIZATION')
+        if not auth:
+            raise GraphQLError("Authentication credentials were not provided.")
+        
+        # Extract token and decode manually
+        token = auth.split(" ")[1]  # Assuming 'Bearer <token>'
+        payload = jwt_decode(token)
+        
+        # Print payload to see what fields it contains
+        print(f"Decoded JWT payload: {payload}")
 
-        if not user.is_authenticated:
-            raise GraphQLError('Authentication credentials were not provided.')
+        # If user_id is not in payload, change to 'user_id' to 'user' or 'username' depending on the payload structure
+        # user_id = payload.get('user_id')  # Modify this line based on actual payload
+        # if not user_id:
+            # raise GraphQLError("User ID not found in the token payload.")
 
-        # Proceed with your logic
+        username = payload.get('username')
+        if not username:
+            raise GraphQLError("Username not found in the token payload.")
+        
+        user = User.objects.get(username=username)
+        print(f"User: {user}")
+
+        # Proceed with the rest of the logic
         file_name = f"{user.username}_uploaded_image.jpg"
         image_data = ContentFile(base64.b64decode(image), name=file_name)
-
-        # Save image to user profile (assuming UserImage model)
         user_image = UserImage(user=user, image_url=image_data)
         user_image.save()
 
@@ -73,6 +88,7 @@ class UploadImage(graphene.Mutation):
 class Mutation(graphene.ObjectType):
     register = Register.Field()
     upload_image = UploadImage.Field()
+    token_auth = graphql_jwt.ObtainJSONWebToken.Field()
 
 # Define the schema with both Query and Mutation
 schema = graphene.Schema(query=Query, mutation=Mutation)
