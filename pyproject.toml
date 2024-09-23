@@ -8,7 +8,6 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-Django = "^5.1.1"
 djangorestframework = "^3.15.2"
 graphene-django = "^3.2.2"
 django-cors-headers = "^4.4.0"
@@ -16,7 +15,8 @@ psycopg2 = "^2.9.9"
 python-decouple = "^3.8"
 boto3 = "^1.35.24"
 django-storages = "^1.14.4"
-djangorestframework-simplejwt = "^5.3.1"
+django = "4.2"
+django-graphql-jwt = "^0.4.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.3"
