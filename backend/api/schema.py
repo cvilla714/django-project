@@ -11,7 +11,15 @@ from graphql_jwt.utils import jwt_decode
 import graphql_jwt
 import base64
 from django.core.files.base import ContentFile
+import uuid
 
+# Initialize the S3 client
+s3_client = boto3.client(
+    's3',
+    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+    region_name='us-east-1'  # Update with your S3 region if needed
+)
 # Define a Task type for GraphQL
 class TaskType(DjangoObjectType):
     class Meta:
@@ -57,18 +65,10 @@ class UploadImage(graphene.Mutation):
         if not auth:
             raise GraphQLError("Authentication credentials were not provided.")
         
-        # Extract token and decode manually
-        token = auth.split(" ")[1]  # Assuming 'Bearer <token>'
+        token = auth.split(" ")[1]
         payload = jwt_decode(token)
-        
-        # Print payload to see what fields it contains
         print(f"Decoded JWT payload: {payload}")
-
-        # If user_id is not in payload, change to 'user_id' to 'user' or 'username' depending on the payload structure
-        # user_id = payload.get('user_id')  # Modify this line based on actual payload
-        # if not user_id:
-            # raise GraphQLError("User ID not found in the token payload.")
-
+        
         username = payload.get('username')
         if not username:
             raise GraphQLError("Username not found in the token payload.")
@@ -76,13 +76,29 @@ class UploadImage(graphene.Mutation):
         user = User.objects.get(username=username)
         print(f"User: {user}")
 
-        # Proceed with the rest of the logic
-        file_name = f"{user.username}_uploaded_image.jpg"
-        image_data = ContentFile(base64.b64decode(image), name=file_name)
-        user_image = UserImage(user=user, image_url=image_data)
+        # Generate a unique filename using a UUID and the username
+        unique_filename = f"user_images/{user.username}_uploaded_image_{uuid.uuid4()}.jpg"
+        image_data = ContentFile(base64.b64decode(image), name=unique_filename)
+        
+        try:
+            # Upload the image to S3
+            s3_client.upload_fileobj(
+                image_data,
+                settings.AWS_STORAGE_BUCKET_NAME,
+                unique_filename,
+                ExtraArgs={'ContentType': 'image/jpeg'}
+            )
+        except Exception as e:
+            raise GraphQLError(f"Failed to upload image to S3: {str(e)}")
+
+        # Save the UserImage model instance with the unique filename
+        user_image = UserImage(user=user, image_url=unique_filename)
         user_image.save()
 
-        return UploadImage(success=True, image_url=user_image.image_url)
+        # Construct the full S3 URL
+        image_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{unique_filename}"
+
+        return UploadImage(success=True, image_url=image_url)
 
 # Combine all mutations
 class Mutation(graphene.ObjectType):
