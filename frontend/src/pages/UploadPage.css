@@ -1,0 +1,101 @@
+/* Styling for Upload Page */
+.upload-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #f7f7f7, #d7e1ec);
+  /* height: 100vh; Ensures the content is vertically centered */
+}
+
+.upload-container {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 500px; /* Adjust width as necessary */
+  width: 100%; /* Ensure the container scales with the screen */
+  margin: 0 auto; /* Center it */
+  word-wrap: break-word; /* Ensure long content breaks */
+}
+
+
+/* .upload-container { */
+  /* background-color: white; */
+  /* padding: 2rem; */
+  /* border-radius: 12px; */
+  /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); */
+  /* text-align: center; */
+  /* max-width: 450px; */
+  /* width: 100%; Ensure it scales with the screen */
+/* } */
+
+.upload-heading {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.upload-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* File input button */
+input[type="file"] {
+  font-size: 1rem;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.upload-button, .sign-out-button {
+  background-color: #007bff;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-bottom: 1rem;
+}
+
+.sign-out-button {
+  background-color: #dc3545;
+}
+
+.upload-button:hover, .sign-out-button:hover {
+  background-color: #0056b3;
+}
+
+.sign-out-button:hover {
+  background-color: #c82333;
+}
+
+.upload-success {
+  margin-top: 1.5rem;
+  font-size: 1rem;
+}
+
+.upload-success a {
+  color: #28a745;
+  text-decoration: none;
+}
+
+.upload-success a:hover {
+  text-decoration: underline;
+}
+
+.image-preview-container {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.image-preview {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
