@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "django-project"
+version = "0.1.0"
+description = "Full Stack application using Django,React and Graphql"
+authors = ["Cosmel Villalobos <cosmelvg@gmail.com>"]
+license = "MITLicense"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+djangorestframework = "^3.15.2"
+graphene-django = "^3.2.2"
+django-cors-headers = "^4.4.0"
+psycopg2 = "^2.9.9"
+python-decouple = "^3.8"
+boto3 = "^1.35.24"
+django-storages = "^1.14.4"
+django = "4.2"
+django-graphql-jwt = "^0.4.0"
+python-dotenv = "^1.0.1"
+zappa = "^0.59.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+black = "^24.8.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
