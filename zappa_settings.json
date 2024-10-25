@@ -1,0 +1,15 @@
+{
+    "dev": {
+        "aws_region": "us-east-1",
+        "django_settings": "backend.settings",
+        "exclude": [],
+        "profile_name": "default",
+        "project_name": "django-project",
+        "runtime": "python3.12",
+        "s3_bucket": "devkc-portfolio-dev",
+        "slim_handler": true,
+        "use_requirements": true,
+        "timeout_seconds": 310,
+        "memory_size": 2048
+    }
+}
