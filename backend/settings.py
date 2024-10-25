@@ -1,23 +1,49 @@
-from dotenv import load_dotenv
 import os
+import boto3
+import json
 from pathlib import Path
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load environment variables from .env file
+# Load environment variables from .env file (in case you need any fallback)
 dotenv_path = os.path.join(BASE_DIR, '.env')
 load_dotenv(dotenv_path)
 
+# Function to get secret from AWS Secrets Manager
+def get_secret(secret_name):
+    client = boto3.client("secretsmanager")
+    get_secret_value_response = client.get_secret_value(SecretId=secret_name)
 
+    secret = get_secret_value_response["SecretString"]
+    return json.loads(secret)
 
-SECRET_KEY = os.getenv('SECRET_KEY')
-DEBUG = os.getenv('DEBUG', default=False)=='True'
-DB_HOST = os.getenv('DB_HOST')
-print(f"Loaded DB_HOST: {DB_HOST}")  # Debug print statemen
+# Fetch the secret from AWS Secrets Manager
+SECRET_NAME = "dev-django-project-rds-credentials"  # Replace with your actual secret name
+secrets = get_secret(SECRET_NAME)
+
+# Set the Django settings using values from AWS Secrets Manager
+SECRET_KEY = secrets.get("SECRET_KEY")
+DEBUG = secrets.get("DEBUG", 'False') == 'True'
+DB_NAME = secrets.get("DB_NAME")
+DB_USER = secrets.get("DB_USER")
+DB_PASSWORD = secrets.get("DB_PASSWORD")
+DB_HOST = secrets.get("DB_HOST")
+DB_PORT = secrets.get("DB_PORT", "5432")
+
+# AWS Credentials
+AWS_ACCESS_KEY_ID = secrets.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = secrets.get("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = secrets.get("AWS_STORAGE_BUCKET_NAME")
+
+# Debug print statements (optional, for testing)
+print(f"Loaded DB_HOST: {DB_HOST}")
+print(f"Loaded AWS_STORAGE_BUCKET_NAME: {AWS_STORAGE_BUCKET_NAME}")
+
+# CORS settings
+CORS_ALLOW_ALL_ORIGINS = True
 
 ALLOWED_HOSTS = []
-# Allow all origins (You can restrict this by specifying the domain)
-CORS_ALLOW_ALL_ORIGINS = True
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -34,7 +60,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    'corsheaders.middleware.CorsMiddleware',  # Add this line at the top
+    'corsheaders.middleware.CorsMiddleware',
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -75,22 +101,19 @@ GRAPHENE = {
     ],
 }
 
-# PostgreSQL database
+# PostgreSQL database settings
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
     }
 }
 
-# AWS S3 for file storage
-AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+# AWS S3 for file storage (Using the folder you specified 'rdsdjango')
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/rdsdjango'
 AWS_DEFAULT_ACL = None
 
