@@ -2,14 +2,30 @@
     "dev": {
         "aws_region": "us-east-1",
         "django_settings": "backend.settings",
-        "exclude": [],
+        "exclude": [
+            "frontend/*",
+            "node_modules/*",
+            "*.sqlite3",
+            ".env",
+            "tests",
+            ".git",
+            "__pycache__"
+        ],
         "profile_name": "default",
         "project_name": "django-project",
         "runtime": "python3.12",
         "s3_bucket": "devkc-portfolio-dev",
+        "vpc_config": {
+        "SubnetIds": ["subnet-047b152a9cc0bf57f", "subnet-028ea55d07cecc9ed"],
+        "SecurityGroupIds": ["sg-010cd6bef1f18f613","sg-08155317938bb6e1a"]
+        },
         "slim_handler": true,
         "use_requirements": true,
-        "timeout_seconds": 310,
-        "memory_size": 2048
+        "xray_tracing": true,
+        "timeout_seconds": 30,
+        "memory_size": 1028,
+        "ephemeral_storage": {
+            "Size": 512
+        }
     }
 }
